@@ -83,13 +83,15 @@ const Dashboard: React.FC = () => {
 
       if (error) throw error;
       
-      toast.success('Mind map created successfully!');
-      setShowNewMapModal(false);
-      setNewMapTitle('');
-      setNewMapDescription('');
-      
-      // Navigate to the editor with the new mind map ID
-      navigate(`/editor/${data.id}`);
+      if (data) {
+        toast.success('Mind map created successfully!');
+        setShowNewMapModal(false);
+        setNewMapTitle('');
+        setNewMapDescription('');
+        
+        // Navigate to the editor with the new mind map ID
+        navigate(`/editor/${data.id}`);
+      }
     } catch (error: any) {
       toast.error(`Error creating mind map: ${error.message}`);
     }

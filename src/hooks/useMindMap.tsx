@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
 
 interface Node {
   id: string;
@@ -75,7 +76,7 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
         if (connectionsError) throw connectionsError;
         
         // Transform connections to expected format
-        const formattedConnections = connectionsData.map(conn => ({
+        const formattedConnections: Connection[] = connectionsData ? connectionsData.map(conn => ({
           id: conn.id,
           sourceId: conn.source_id,
           targetId: conn.target_id,
@@ -83,11 +84,11 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
           connection_type: conn.connection_type,
           thickness: conn.thickness,
           style: conn.style,
-        }));
+        })) : [];
         
         setState(prevState => ({
           ...prevState,
-          nodes: nodesData,
+          nodes: nodesData || [],
           connections: formattedConnections,
         }));
       } catch (error: any) {
@@ -119,13 +120,17 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
       
       if (error) throw error;
       
-      setState(prevState => ({
-        ...prevState,
-        nodes: [...prevState.nodes, data],
-        selectedNodeId: data.id,
-      }));
+      if (data) {
+        setState(prevState => ({
+          ...prevState,
+          nodes: [...prevState.nodes, data],
+          selectedNodeId: data.id,
+        }));
+        
+        return data.id;
+      }
       
-      return data.id;
+      return null;
     } catch (error: any) {
       toast.error(`Error adding node: ${error.message}`);
       return null;
@@ -293,22 +298,24 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
       
       if (error) throw error;
       
-      const newConnection = {
-        id: data.id,
-        sourceId: data.source_id,
-        targetId: data.target_id,
-        color: data.color,
-        connection_type: data.connection_type,
-        thickness: data.thickness,
-        style: data.style,
-      };
-      
-      setState(prevState => ({
-        ...prevState,
-        connections: [...prevState.connections, newConnection],
-      }));
-      
-      toast.success('Connection created');
+      if (data) {
+        const newConnection: Connection = {
+          id: data.id,
+          sourceId: data.source_id,
+          targetId: data.target_id,
+          color: data.color,
+          connection_type: data.connection_type,
+          thickness: data.thickness,
+          style: data.style,
+        };
+        
+        setState(prevState => ({
+          ...prevState,
+          connections: [...prevState.connections, newConnection],
+        }));
+        
+        toast.success('Connection created');
+      }
     } catch (error: any) {
       toast.error(`Error creating connection: ${error.message}`);
     }

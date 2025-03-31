@@ -41,7 +41,11 @@ const Connection: React.FC<ConnectionProps> = ({
       // Curved line with control points
       const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2;
-      return `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+      return `M${startX},${startY} Q${midX},${startY} ${midX},${midY} T${endX},${endY}`;
+    } else if (type === 'angled') {
+      // Angled line with right angles
+      const midX = (startX + endX) / 2;
+      return `M${startX},${startY} L${midX},${startY} L${midX},${endY} L${endX},${endY}`;
     } else {
       // Straight line
       return `M${startX},${startY} L${endX},${endY}`;
@@ -49,7 +53,15 @@ const Connection: React.FC<ConnectionProps> = ({
   };
   
   // Determine if we need an arrow
-  const needsArrow = type === 'arrow';
+  const needsArrow = type === 'arrow' || type === 'arrow-curved' || type === 'arrow-angled';
+  
+  // Get base type without arrow
+  const getBaseType = () => {
+    if (type === 'arrow') return 'straight';
+    if (type === 'arrow-curved') return 'curved';
+    if (type === 'arrow-angled') return 'angled';
+    return type;
+  };
   
   // Calculate arrow points if needed
   const calculateArrowPoints = () => {
@@ -68,12 +80,13 @@ const Connection: React.FC<ConnectionProps> = ({
   
   return (
     <svg 
-      className="connection" 
+      className="connection absolute pointer-events-none" 
       style={{
         left: Math.min(startX, endX) - 50,
         top: Math.min(startY, endY) - 50,
         width: Math.abs(endX - startX) + 100,
-        height: Math.abs(endY - startY) + 100
+        height: Math.abs(endY - startY) + 100,
+        zIndex: 0
       }}
     >
       <path 
