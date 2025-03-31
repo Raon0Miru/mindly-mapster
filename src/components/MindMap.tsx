@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import Node from './Node';
 import Connection from './Connection';
@@ -55,22 +56,6 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
         rect.height / 2 - 30, // Half of assumed node height
         shape || currentShape
       );
-    }
-  };
-
-  const handleAddConnection = () => {
-    if (selectedNodeId) {
-      startConnectionMode();
-      toast.info("Select another node to connect");
-    }
-  };
-
-  const handleShapeChange = (shape: NodeShape) => {
-    changeShape(shape);
-    
-    // If a node is selected, also update its shape
-    if (selectedNodeId) {
-      updateNodeType(selectedNodeId, shape);
     }
   };
 
@@ -137,22 +122,6 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
             onGetCenter={getNodeCenter}
           />
         ))}
-        
-        {/* Toolbar */}
-        <Toolbar
-          onAddNode={handleAddNode}
-          onDeleteNode={deleteSelectedNode}
-          onAddConnection={handleAddConnection}
-          onColorChange={(color) => {
-            if (selectedNodeId) {
-              updateNodeColor(selectedNodeId, color);
-            }
-          }}
-          onShapeChange={handleShapeChange}
-          currentShape={currentShape}
-          canDelete={!!selectedNodeId}
-          canConnect={!!selectedNodeId && !connectMode.active}
-        />
       </div>
     </div>
   );
