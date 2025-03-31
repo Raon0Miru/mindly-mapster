@@ -1,8 +1,6 @@
-
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import Node from './Node';
 import Connection from './Connection';
-import Toolbar from './Toolbar';
 import { useMindMap } from '@/hooks/useMindMap';
 import { toast } from "sonner";
 import { Skeleton } from '@/components/ui/skeleton';
