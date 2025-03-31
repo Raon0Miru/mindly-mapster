@@ -37,12 +37,18 @@ const Connection: React.FC<ConnectionProps> = ({
   
   // Calculate path based on type
   const getPath = () => {
-    if (type === 'curved') {
+    // Check for arrow types first and convert to base type
+    let baseType = type;
+    if (type === 'arrow') baseType = 'straight';
+    if (type === 'arrow-curved') baseType = 'curved';
+    if (type === 'arrow-angled') baseType = 'angled';
+    
+    if (baseType === 'curved') {
       // Curved line with control points
       const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2;
       return `M${startX},${startY} Q${midX},${startY} ${midX},${midY} T${endX},${endY}`;
-    } else if (type === 'angled') {
+    } else if (baseType === 'angled') {
       // Angled line with right angles
       const midX = (startX + endX) / 2;
       return `M${startX},${startY} L${midX},${startY} L${midX},${endY} L${endX},${endY}`;
@@ -53,15 +59,7 @@ const Connection: React.FC<ConnectionProps> = ({
   };
   
   // Determine if we need an arrow
-  const needsArrow = type === 'arrow' || type === 'arrow-curved' || type === 'arrow-angled';
-  
-  // Get base type without arrow
-  const getBaseType = () => {
-    if (type === 'arrow') return 'straight';
-    if (type === 'arrow-curved') return 'curved';
-    if (type === 'arrow-angled') return 'angled';
-    return type;
-  };
+  const needsArrow = type.includes('arrow');
   
   // Calculate arrow points if needed
   const calculateArrowPoints = () => {

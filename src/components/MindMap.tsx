@@ -1,11 +1,12 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Node from './Node';
 import Connection from './Connection';
 import Toolbar from './Toolbar';
 import { useMindMap } from '@/hooks/useMindMap';
 import { toast } from "sonner";
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNodeShapes, NodeShape } from '@/hooks/useNodeShapes';
 
 interface MindMapProps {
   mindMapId: string;
@@ -15,6 +16,7 @@ interface MindMapProps {
 
 const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '#FFFFFF' }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const { currentShape, changeShape } = useNodeShapes('rectangle');
   
   const { 
     nodes, 
@@ -26,6 +28,7 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
     updateNodePosition,
     updateNodeText,
     updateNodeColor,
+    updateNodeType,
     selectNode,
     deleteSelectedNode,
     startConnectionMode,
@@ -45,13 +48,14 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
     }
   };
 
-  const handleAddNode = () => {
+  const handleAddNode = (shape?: NodeShape) => {
     // Add node at the center of the canvas
     if (canvasRef.current) {
       const rect = canvasRef.current.getBoundingClientRect();
       addNode(
         rect.width / 2 - 70, // Half of assumed node width
         rect.height / 2 - 30, // Half of assumed node height
+        shape || currentShape
       );
     }
   };
@@ -60,6 +64,15 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
     if (selectedNodeId) {
       startConnectionMode();
       toast.info("Select another node to connect");
+    }
+  };
+
+  const handleShapeChange = (shape: NodeShape) => {
+    changeShape(shape);
+    
+    // If a node is selected, also update its shape
+    if (selectedNodeId) {
+      updateNodeType(selectedNodeId, shape);
     }
   };
 
@@ -137,6 +150,8 @@ const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '
               updateNodeColor(selectedNodeId, color);
             }
           }}
+          onShapeChange={handleShapeChange}
+          currentShape={currentShape}
           canDelete={!!selectedNodeId}
           canConnect={!!selectedNodeId && !connectMode.active}
         />

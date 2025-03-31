@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
+import { NodeShape } from './useNodeShapes';
 
 interface Node {
   id: string;
@@ -101,7 +101,7 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
     fetchMindMapData();
   }, [mindMapId]);
 
-  const addNode = async (x: number, y: number) => {
+  const addNode = async (x: number, y: number, nodeType: NodeShape = 'rectangle') => {
     try {
       const { data, error } = await supabase
         .from('nodes')
@@ -111,9 +111,9 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
           y,
           text: '',
           color: '#FFFFFF',
-          node_type: 'rectangle',
+          node_type: nodeType,
           width: 140,
-          height: 60,
+          height: nodeType === 'circle' ? 140 : 60,
         })
         .select()
         .single();
@@ -145,7 +145,6 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
       ),
     }));
     
-    // Debounced update to Supabase
     const updatePosition = async () => {
       try {
         const { error } = await supabase
@@ -170,7 +169,6 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
       ),
     }));
     
-    // Debounced update to Supabase
     const updateText = async () => {
       try {
         const { error } = await supabase
@@ -185,6 +183,34 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
     };
     
     updateText();
+  };
+
+  const updateNodeType = async (id: string, nodeType: string) => {
+    let width = 140;
+    let height = nodeType === 'circle' ? 140 : 60;
+    
+    setState(prevState => ({
+      ...prevState,
+      nodes: prevState.nodes.map(node => 
+        node.id === id ? { ...node, node_type: nodeType, width, height } : node
+      ),
+    }));
+    
+    try {
+      const { error } = await supabase
+        .from('nodes')
+        .update({ 
+          node_type: nodeType, 
+          width, 
+          height, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(`Error updating node type: ${error.message}`);
+    }
   };
 
   const updateNodeColor = async (id: string, color: string) => {
@@ -209,7 +235,6 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
 
   const selectNode = (id: string | null) => {
     setState(prevState => {
-      // If in connect mode and selecting a target node
       if (prevState.connectMode.active && id && id !== prevState.connectMode.sourceId) {
         createConnection(prevState.connectMode.sourceId!, id);
         
@@ -233,7 +258,6 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
       
       const nodeId = prevState.selectedNodeId;
       
-      // Delete from Supabase
       const deleteNode = async () => {
         try {
           const { error } = await supabase
@@ -341,6 +365,7 @@ export const useMindMap = ({ mindMapId }: UseMindMapProps) => {
     updateNodePosition,
     updateNodeText,
     updateNodeColor,
+    updateNodeType,
     selectNode,
     deleteSelectedNode,
     startConnectionMode,
