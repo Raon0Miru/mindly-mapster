@@ -5,12 +5,15 @@ import Connection from './Connection';
 import Toolbar from './Toolbar';
 import { useMindMap } from '@/hooks/useMindMap';
 import { toast } from "sonner";
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MindMapProps {
+  mindMapId: string;
   title: string;
+  backgroundColor?: string;
 }
 
-const MindMap: React.FC<MindMapProps> = ({ title }) => {
+const MindMap: React.FC<MindMapProps> = ({ mindMapId, title, backgroundColor = '#FFFFFF' }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -18,6 +21,7 @@ const MindMap: React.FC<MindMapProps> = ({ title }) => {
     connections, 
     selectedNodeId, 
     connectMode,
+    isLoading,
     addNode,
     updateNodePosition,
     updateNodeText,
@@ -27,7 +31,7 @@ const MindMap: React.FC<MindMapProps> = ({ title }) => {
     startConnectionMode,
     cancelConnectionMode,
     getNodeCenter
-  } = useMindMap();
+  } = useMindMap({ mindMapId });
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Only deselect if we clicked directly on the canvas (not on a node)
@@ -59,16 +63,28 @@ const MindMap: React.FC<MindMapProps> = ({ title }) => {
     }
   };
 
-  return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="bg-mindly-grey bg-opacity-50 p-2 flex items-center">
-        <h2 className="text-lg font-medium text-mindly-deep-purple">{title}</h2>
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-4 flex items-center justify-center">
+        <div className="space-y-4 w-full max-w-md">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-40 w-full" />
+          <div className="flex gap-4">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
       </div>
-      
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
       <div 
         ref={canvasRef}
-        className="mindmap-canvas"
+        className="mindmap-canvas flex-1"
         onClick={handleCanvasClick}
+        style={{ backgroundColor }}
       >
         {/* Render connections */}
         {connections.map((connection) => {
@@ -83,6 +99,9 @@ const MindMap: React.FC<MindMapProps> = ({ title }) => {
               endX={targetCenter.x}
               endY={targetCenter.y}
               color={connection.color}
+              thickness={connection.thickness}
+              style={connection.style}
+              type={connection.connection_type}
             />
           );
         })}
@@ -94,9 +113,13 @@ const MindMap: React.FC<MindMapProps> = ({ title }) => {
             id={node.id}
             x={node.x}
             y={node.y}
-            text={node.text}
+            text={node.text || ''}
             color={node.color}
+            nodeType={node.node_type}
+            width={node.width}
+            height={node.height}
             selected={node.id === selectedNodeId}
+            connecting={connectMode.active && connectMode.sourceId === node.id}
             onSelect={selectNode}
             onMove={updateNodePosition}
             onTextChange={updateNodeText}

@@ -7,6 +7,9 @@ interface ConnectionProps {
   endX: number;
   endY: number;
   color?: string;
+  thickness?: number;
+  style?: string;
+  type?: string;
 }
 
 const Connection: React.FC<ConnectionProps> = ({ 
@@ -14,15 +17,54 @@ const Connection: React.FC<ConnectionProps> = ({
   startY, 
   endX, 
   endY,
-  color = "#D1D5DB" 
+  color = "#D1D5DB",
+  thickness = 2,
+  style = "solid",
+  type = "straight"
 }) => {
   
-  // Calculate control points for a curved line
-  const midX = (startX + endX) / 2;
-  const midY = (startY + endY) / 2;
+  // Get dash array based on style
+  const getDashArray = () => {
+    switch (style) {
+      case 'dashed':
+        return '5,5';
+      case 'dotted':
+        return '2,2';
+      default:
+        return 'none';
+    }
+  };
   
-  // Path data for a curved line
-  const path = `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+  // Calculate path based on type
+  const getPath = () => {
+    if (type === 'curved') {
+      // Curved line with control points
+      const midX = (startX + endX) / 2;
+      const midY = (startY + endY) / 2;
+      return `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+    } else {
+      // Straight line
+      return `M${startX},${startY} L${endX},${endY}`;
+    }
+  };
+  
+  // Determine if we need an arrow
+  const needsArrow = type === 'arrow';
+  
+  // Calculate arrow points if needed
+  const calculateArrowPoints = () => {
+    if (!needsArrow) return null;
+    
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const length = 10;
+    
+    const x1 = endX - length * Math.cos(angle - Math.PI / 6);
+    const y1 = endY - length * Math.sin(angle - Math.PI / 6);
+    const x2 = endX - length * Math.cos(angle + Math.PI / 6);
+    const y2 = endY - length * Math.sin(angle + Math.PI / 6);
+    
+    return `M${endX},${endY} L${x1},${y1} L${x2},${y2} Z`;
+  };
   
   return (
     <svg 
@@ -35,11 +77,20 @@ const Connection: React.FC<ConnectionProps> = ({
       }}
     >
       <path 
-        d={path} 
+        d={getPath()} 
         fill="none" 
         stroke={color}
-        strokeWidth="2"
+        strokeWidth={thickness}
+        strokeDasharray={getDashArray()}
       />
+      {needsArrow && (
+        <path 
+          d={calculateArrowPoints()} 
+          fill={color} 
+          stroke={color} 
+          strokeWidth="1"
+        />
+      )}
     </svg>
   );
 };

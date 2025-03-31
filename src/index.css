@@ -62,6 +62,10 @@
   .node-selected {
     @apply ring-2 ring-primary;
   }
+
+  .node-connecting {
+    @apply ring-2 ring-blue-400;
+  }
   
   .connection {
     @apply absolute pointer-events-none;
@@ -79,5 +83,48 @@
   
   .color-button {
     @apply w-8 h-8 rounded-full border border-gray-200 transition-transform hover:scale-110;
+  }
+
+  /* Custom node shapes */
+  .node-hexagon {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+  
+  .node-triangle {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  
+  .node-diamond {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  /* Animation */
+  @keyframes nodeAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-node-appear {
+    animation: nodeAppear 0.2s ease-in-out;
+  }
+
+  /* Sidebar animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
   }
 }

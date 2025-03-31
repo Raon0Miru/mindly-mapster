@@ -7,7 +7,11 @@ interface NodeProps {
   y: number;
   text: string;
   color: string;
+  nodeType: string;
+  width: number;
+  height: number;
   selected: boolean;
+  connecting?: boolean;
   onSelect: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
   onTextChange: (id: string, text: string) => void;
@@ -20,7 +24,11 @@ const Node: React.FC<NodeProps> = ({
   y,
   text,
   color,
+  nodeType,
+  width,
+  height,
   selected,
+  connecting = false,
   onSelect,
   onMove,
   onTextChange,
@@ -67,13 +75,31 @@ const Node: React.FC<NodeProps> = ({
     };
   }, [isDragging]);
 
+  // Determine the shape CSS classes based on the nodeType
+  const getShapeClass = () => {
+    switch (nodeType) {
+      case 'circle':
+        return 'rounded-full';
+      case 'hexagon':
+        return 'node-hexagon';
+      case 'triangle':
+        return 'node-triangle';
+      case 'diamond':
+        return 'node-diamond';
+      default:
+        return 'rounded-md';
+    }
+  };
+
   return (
     <div
       ref={nodeRef}
-      className={`node ${selected ? 'node-selected' : ''}`}
+      className={`node ${selected ? 'node-selected' : ''} ${connecting ? 'node-connecting' : ''} ${getShapeClass()}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
+        width: `${width}px`,
+        height: `${height}px`,
         backgroundColor: color,
         borderColor: selected ? 'transparent' : '#e5e7eb',
       }}

@@ -9,7 +9,156 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      connections: {
+        Row: {
+          color: string
+          connection_type: string
+          created_at: string
+          id: string
+          mindmap_id: string
+          source_id: string
+          style: string
+          target_id: string
+          thickness: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          connection_type?: string
+          created_at?: string
+          id?: string
+          mindmap_id: string
+          source_id: string
+          style?: string
+          target_id: string
+          thickness?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          connection_type?: string
+          created_at?: string
+          id?: string
+          mindmap_id?: string
+          source_id?: string
+          style?: string
+          target_id?: string
+          thickness?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_mindmap_id_fkey"
+            columns: ["mindmap_id"]
+            isOneToOne: false
+            referencedRelation: "mindmaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connections_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connections_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mindmaps: {
+        Row: {
+          background_type: string
+          background_value: string
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          background_type?: string
+          background_value?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          background_type?: string
+          background_value?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      nodes: {
+        Row: {
+          color: string
+          created_at: string
+          font_size: number
+          font_style: string | null
+          height: number
+          id: string
+          mindmap_id: string
+          node_type: string
+          text: string | null
+          updated_at: string
+          width: number
+          x: number
+          y: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          font_size?: number
+          font_style?: string | null
+          height?: number
+          id?: string
+          mindmap_id: string
+          node_type?: string
+          text?: string | null
+          updated_at?: string
+          width?: number
+          x: number
+          y: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          font_size?: number
+          font_style?: string | null
+          height?: number
+          id?: string
+          mindmap_id?: string
+          node_type?: string
+          text?: string | null
+          updated_at?: string
+          width?: number
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nodes_mindmap_id_fkey"
+            columns: ["mindmap_id"]
+            isOneToOne: false
+            referencedRelation: "mindmaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
